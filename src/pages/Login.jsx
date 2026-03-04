@@ -23,9 +23,15 @@ export default function Login() {
         try {
             const success = await login(username, password);
             if (success) {
-                navigate(from, { replace: true });
+                // Get role from local storage to decide redirection
+                const userData = JSON.parse(localStorage.getItem('dc_user'));
+                if (userData?.role === 'superadmin') {
+                    navigate('/superadmin/portal', { replace: true });
+                } else {
+                    navigate(from, { replace: true });
+                }
             } else {
-                setError('Invalid username or password');
+                setError('Invalid credentials. If you are an Admin, please use your dedicated ID.');
                 setLoading(false);
             }
         } catch (err) {
@@ -70,12 +76,12 @@ export default function Login() {
                         )}
 
                         <div className="form-group">
-                            <label>Username</label>
+                            <label>Mail ID</label>
                             <div className="input-with-icon">
                                 <User size={18} className="input-icon" />
                                 <input
                                     type="text"
-                                    placeholder="e.g. admin"
+                                    placeholder="e.g. hospital@email.com"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
@@ -125,7 +131,12 @@ export default function Login() {
             </div>
 
             <div className="login-test-info">
-                <p>Test Credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+                <p>Clinic Login: <strong>admin</strong> / <strong>admin123</strong></p>
+                <div className="mt-2 text-blue-500 font-bold flex items-center gap-2 justify-center cursor-pointer hover:underline" onClick={() => {
+                    setUsername('superadmin'); setPassword('superadmin123');
+                }}>
+                    <ShieldCheck size={14} /> Global Admin Login (Portal Access)
+                </div>
             </div>
         </div>
     );

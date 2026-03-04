@@ -21,7 +21,7 @@ export default function NewBill() {
     const [saved, setSaved] = useState(null);
     const printRef = useRef();
 
-    const patient = patients.find(p => p.id === patientId);
+    const patient = patients.find(p => p._id === patientId || p.id === patientId);
     const subtotal = items.reduce((s, it) => s + (parseFloat(it.price) || 0) * (parseInt(it.qty) || 1), 0);
     const gstAmt = gst ? (subtotal - discount) * GST_RATE : 0;
     const total = subtotal - discount + gstAmt;
@@ -132,7 +132,7 @@ export default function NewBill() {
                         <div className="form-group">
                             <select value={patientId} onChange={e => setPatientId(e.target.value)}>
                                 <option value="">Select patient…</option>
-                                {patients.map(p => <option key={p.id} value={p.id}>{p.name} — {p.phone}</option>)}
+                                {patients.map(p => <option key={p._id} value={p._id}>{p.name} — {p.phone || p.contact}</option>)}
                             </select>
                         </div>
                         {patient && (

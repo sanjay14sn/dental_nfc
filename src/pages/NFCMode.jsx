@@ -40,10 +40,13 @@ export default function NFCMode() {
     };
 
     const age = patient?.dob ? differenceInYears(new Date(), parseISO(patient.dob)) : '—';
-    const patientAppts = patient ? appointments.filter(a => a.patientId === patient.id).sort((a, b) => b.date.localeCompare(a.date)) : [];
-    const todayAppt = patientAppts.find(a => a.date === today);
-    const nextAppt = patientAppts.find(a => a.date >= today && a.status !== 'cancelled');
-    const patientBills = patient ? bills.filter(b => b.patientId === patient.id) : [];
+    const patientAppts = patient ? appointments.filter(a => {
+        const pId = typeof a.patientId === 'object' ? a.patientId?._id : a.patientId;
+        return pId === patient._id;
+    }).sort((a, b) => b.date.localeCompare(a.date)) : [];
+    const todayAppt = patientAppts.find(a => (a.date.includes('T') ? a.date.split('T')[0] : a.date) === today);
+    const nextAppt = patientAppts.find(a => (a.date.includes('T') ? a.date.split('T')[0] : a.date) >= today && a.status !== 'cancelled');
+    const patientBills = patient ? bills.filter(b => b.patientId === patient._id) : [];
     const pendingAmt = patientBills.filter(b => b.status !== 'paid').reduce((s, b) => s + (b.total - b.paid), 0);
     const lastBill = patientBills.sort((a, b) => b.date.localeCompare(a.date))[0];
     const lastAppt = patientAppts[0];
@@ -81,7 +84,7 @@ export default function NFCMode() {
                     {/* Quick pick */}
                     <div className="nfc-quick-picks">
                         {patients.slice(0, 5).map(p => (
-                            <button key={p.id} className="nfc-quick-btn" onClick={() => { setQuery(p.nfcId); setPatient(p); setError(''); }}>
+                            <button key={p._id} className="nfc-quick-btn" onClick={() => { setQuery(p.nfcId); setPatient(p); setError(''); }}>
                                 {p.nfcId} — {p.name}
                             </button>
                         ))}
@@ -102,7 +105,7 @@ export default function NFCMode() {
                         </div>
                         <div className="nfc-patient-main">
                             <div className="nfc-name">{patient.name}</div>
-                            <div className="nfc-meta">{patient.gender} · {age} yrs · {patient.bloodGroup} · {patient.phone}</div>
+                            <div className="nfc-meta">{patient.gender} · {age} yrs · {patient.bloodGroup} · {patient.phone || patient.contact}</div>
                             {patient.medicalHistory && patient.medicalHistory !== 'None' && (
                                 <div className="profile-tag warning" style={{ display: 'inline-flex', marginTop: 6 }}>
                                     <span>⚠</span> {patient.medicalHistory}
@@ -164,13 +167,13 @@ export default function NFCMode() {
                     </div>
 
                     <div className="nfc-actions">
-                        <button className="btn btn-primary" onClick={() => navigate(`/patients/${patient.id}`)}>
+                        <button className="btn btn-primary" onClick={() => navigate(`/patients/${patient._id}`)}>
                             <User size={15} /> Full Profile
                         </button>
-                        <button className="btn btn-secondary" onClick={() => navigate(`/dental-chart/${patient.id}`)}>
+                        <button className="btn btn-secondary" onClick={() => navigate(`/dental-chart/${patient._id}`)}>
                             <Activity size={15} /> Dental Chart
                         </button>
-                        <button className="btn btn-secondary" onClick={() => navigate(`/billing/new/${patient.id}`)}>
+                        <button className="btn btn-secondary" onClick={() => navigate(`/billing/new/${patient._id}`)}>
                             <CreditCard size={15} /> Create Bill
                         </button>
                         <button className="btn btn-ghost" onClick={() => navigate('/appointments')}>

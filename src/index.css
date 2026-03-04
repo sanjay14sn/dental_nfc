@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ============================================================
    DentaFlow – Global Styles
    Medical soft palette + premium typography
@@ -3617,49 +3619,191 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
 /* --- AI Summary Feature --- */
 .ai-summary-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center; z-index: 2000;
-  padding: 20px; animation: fadeIn 0.3s ease;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
 }
+
 .ai-summary-panel {
-  background: #fff; width: 100%; max-width: 500px; border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.7);
-  overflow: hidden; position: relative;
+  background: #fff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  position: relative;
 }
+
 .ai-header {
-  background: linear-gradient(135deg, #6366f1, #a855f7); padding: 16px 20px;
-  display: flex; align-items: center; justify-content: space-between; color: #fff;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
 }
-.ai-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
-.ai-close { background: none; border: none; color: #fff; cursor: pointer; opacity: 0.8; transition: 0.2s; }
-.ai-close:hover { opacity: 1; transform: scale(1.1); }
 
-.ai-loading { padding: 40px; text-align: center; color: var(--text-2); }
-.ai-brain-anim { color: #8b5cf6; margin-bottom: 20px; animation: pulse 1.5s infinite ease-in-out; }
-.ai-progress-bar { height: 6px; background: #f0f0f0; border-radius: 3px; margin: 20px auto 0; width: 200px; overflow: hidden; }
-.ai-progress-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a855f7); width: 0; animation: progress 1.8s linear forwards; }
-
-.ai-content { padding: 24px; }
-.ai-section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8b5cf6; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-.ai-narrative { font-size: 1rem; color: var(--text); line-height: 1.6; margin-bottom: 20px; }
-
-.ai-insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.ai-insight-card { background: #f8fafc; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; }
-.ai-card-title { font-size: 0.75rem; color: var(--text-2); }
-.ai-card-val { font-weight: 700; font-size: 0.9rem; color: var(--text); }
-
-.ai-recommendation { 
-  background: #fdf4ff; border-left: 4px solid #d946ef; padding: 16px; border-radius: 4px 12px 12px 4px;
-  color: #701a75; font-size: 0.9rem; font-weight: 500; display: flex; gap: 12px; margin-bottom: 20px;
+.ai-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
-.ai-trend-icon { color: #d946ef; flex-shrink: 0; }
 
-.ai-footer { border-top: 1px solid #f0f0f0; padding-top: 12px; text-align: center; color: var(--text-3); font-style: italic; }
+.ai-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: 0.2s;
+}
 
-@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.15); opacity: 1; } }
-@keyframes progress { from { width: 0; } to { width: 100%; } }
+.ai-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.ai-loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-2);
+}
+
+.ai-brain-anim {
+  color: #8b5cf6;
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.ai-progress-bar {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  margin: 20px auto 0;
+  width: 200px;
+  overflow: hidden;
+}
+
+.ai-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  width: 0;
+  animation: progress 1.8s linear forwards;
+}
+
+.ai-content {
+  padding: 24px;
+}
+
+.ai-section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b5cf6;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-narrative {
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.ai-insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ai-insight-card {
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.ai-card-title {
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+.ai-card-val {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.ai-recommendation {
+  background: #fdf4ff;
+  border-left: 4px solid #d946ef;
+  padding: 16px;
+  border-radius: 4px 12px 12px 4px;
+  color: #701a75;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ai-trend-icon {
+  color: #d946ef;
+  flex-shrink: 0;
+}
+
+.ai-footer {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  text-align: center;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
 
 /* --- Login Page Styles --- */
 .login-page {
@@ -3709,13 +3853,34 @@ tbody tr:hover {
   animation: float-anim 6s infinite ease-in-out;
 }
 
-.icon-1 { top: 15%; left: 10%; animation-delay: 0s; }
-.icon-2 { bottom: 20%; right: 15%; animation-delay: 2s; }
-.icon-3 { top: 60%; left: 20%; animation-delay: 4s; }
+.icon-1 {
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.icon-2 {
+  bottom: 20%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.icon-3 {
+  top: 60%;
+  left: 20%;
+  animation-delay: 4s;
+}
 
 @keyframes float-anim {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-20px) rotate(10deg); }
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
 }
 
 .login-card {
@@ -3796,9 +3961,19 @@ tbody tr:hover {
 }
 
 @keyframes shake-anim {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .input-with-icon {
@@ -3831,7 +4006,7 @@ tbody tr:hover {
   box-shadow: 0 0 0 4px var(--primary-light);
 }
 
-.input-with-icon input:focus + .input-icon {
+.input-with-icon input:focus+.input-icon {
   color: var(--primary);
 }
 
@@ -3932,14 +4107,21 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   animation: slideIn 0.3s ease-out;
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Smart Recall Section */
@@ -4035,3 +4217,88 @@ tbody tr:hover {
   gap: 6px;
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
+/* ============================================================
+   Staff Management Portal - Dedicated Styles
+   ============================================================ */
+.staff-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.staff-card {
+  background: var(--card) !important;
+  border-radius: var(--radius-xl) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition) !important;
+  overflow: hidden !important;
+  margin-bottom: 1.5rem;
+}
+
+.staff-card:hover {
+  box-shadow: var(--shadow) !important;
+  transform: translateY(-2px) !important;
+}
+
+.staff-input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.staff-input-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  margin-left: 0.5rem;
+}
+
+.staff-input-wrapper {
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.staff-input-icon {
+  position: absolute;
+  left: 1.25rem;
+  color: var(--primary);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.staff-input {
+  width: 100% !important;
+  min-height: 3.5rem !important;
+  padding: 0.8rem 1rem 0.8rem 4rem !important;
+  border: 2px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  background: #fff !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.staff-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px var(--primary-light) !important;
+}
+
+.staff-badge {
+  padding: 0.35rem 1rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.staff-badge-admin { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
+.staff-badge-doctor { background: #dbeafe; color: #3b82f6; border: 1px solid #bfdbfe; }
+.staff-badge-nurse { background: #dcfce7; color: #22c55e; border: 1px solid #bbf7d0; }

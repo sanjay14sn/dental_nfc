@@ -3,17 +3,17 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Users, CalendarDays, CreditCard, Cpu,
     Stethoscope, Activity, Search, Bell, ChevronLeft, ChevronRight,
-    LogOut, Settings, Wifi, FileText, Image, Menu, X
+    LogOut, Settings, Wifi, FileText, Image, Menu, X, Hospital as HospitalIcon
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 const NAV_ITEMS = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard', end: true },
-    { to: '/patients', icon: Users, label: 'Patients', badge: null },
-    { to: '/appointments', icon: CalendarDays, label: 'Appointments' },
-    { to: '/dental-chart', icon: Activity, label: 'Dental Chart' },
-    { to: '/scans', icon: Image, label: 'Scans' },
-    { to: '/billing', icon: CreditCard, label: 'Billing' },
+    { to: '/patients', icon: Users, label: 'Patients', badge: null, permissionKey: 'patients' },
+    { to: '/appointments', icon: CalendarDays, label: 'Appointments', permissionKey: 'bookings' },
+    { to: '/dental-chart', icon: Activity, label: 'Dental Chart', permissionKey: 'dentalChart' },
+    { to: '/scans', icon: Image, label: 'Scans', permissionKey: 'scans' },
+    { to: '/billing', icon: CreditCard, label: 'Billing', permissionKey: 'payments' },
     { to: '/nfc', icon: Wifi, label: 'NFC Mode' },
     { to: '/doctor', icon: Stethoscope, label: 'Doctor Panel' },
 ];
@@ -75,7 +75,17 @@ export default function Layout({ children }) {
 
                 <nav className="sidebar-nav">
                     {!collapsed && <div className="sidebar-section-label">Main Menu</div>}
-                    {NAV_ITEMS.map((item) => (
+                    {NAV_ITEMS.filter(item => {
+                        // Super Admin & Admin see everything
+                        if (['superadmin', 'admin'].includes(user?.role)) return true;
+
+                        // Check granular permissions for others
+                        if (item.permissionKey && user?.permissions) {
+                            return user.permissions[item.permissionKey]?.read;
+                        }
+
+                        return true;
+                    }).map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
@@ -91,7 +101,21 @@ export default function Layout({ children }) {
                         </NavLink>
                     ))}
 
+                    {/* Administration sections moved to Central Portal as requested by Super Admin */}
+
                     {!collapsed && <div className="sidebar-section-label" style={{ marginTop: 8 }}>System</div>}
+
+                    {['admin', 'superadmin'].includes(user?.role) && (
+                        <NavLink
+                            to="/admin/users"
+                            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                            title={collapsed ? 'Staff Management' : undefined}
+                        >
+                            <Stethoscope size={18} />
+                            {!collapsed && <span className="nav-label">Staff Management</span>}
+                        </NavLink>
+                    )}
+
                     <NavLink
                         to="/settings"
                         className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}

@@ -17,7 +17,7 @@ export default function Billing() {
     const [statusFilter, setStatusFilter] = useState('all');
 
     const filtered = bills.filter(b => {
-        const patient = patients.find(p => p.id === b.patientId);
+        const patient = patients.find(p => p._id === b.patientId || p.id === b.patientId);
         const matchQ = !q || patient?.name?.toLowerCase().includes(q.toLowerCase()) || b.id.includes(q);
         const matchS = statusFilter === 'all' || b.status === statusFilter;
         return matchQ && matchS;
@@ -99,16 +99,17 @@ export default function Billing() {
                             <tr><td colSpan={9} style={{ textAlign: 'center', padding: 32, color: 'var(--text-2)' }}>No bills found</td></tr>
                         )}
                         {filtered.map(b => {
-                            const patient = patients.find(p => p.id === b.patientId);
+                            const pId = typeof b.patientId === 'object' ? b.patientId?._id : b.patientId;
+                            const patient = patients.find(p => p._id === pId || p.id === pId);
                             const cfg = STATUS_CONFIG[b.status] || STATUS_CONFIG.pending;
                             return (
                                 <tr key={b.id}>
                                     <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{b.id.toUpperCase()}</td>
                                     <td>
                                         <div style={{ fontWeight: 500 }}>{patient?.name || '—'}</div>
-                                        <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{patient?.phone}</div>
+                                        <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{patient?.phone || patient?.contact}</div>
                                     </td>
-                                    <td style={{ color: 'var(--text-2)', fontSize: 13 }}>{b.date ? format(parseISO(b.date), 'd MMM yyyy') : '—'}</td>
+                                    <td style={{ color: 'var(--text-2)', fontSize: 13 }}>{b.date ? format(b.date.includes('T') ? parseISO(b.date) : parseISO(b.date + 'T00:00:00'), 'd MMM yyyy') : '—'}</td>
                                     <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
                                         {b.items?.map((it, i) => <div key={i}>{it.treatment}{it.tooth ? ` #${it.tooth}` : ''}</div>)}
                                     </td>

@@ -36,7 +36,7 @@ export default function NewPatient() {
         if (!validate()) return;
         try {
             const patient = await addPatient(form);
-            navigate(`/patients/${patient.id}`);
+            navigate(`/patients/${patient._id}`);
         } catch (err) {
             setErrors({ submit: 'Failed to register patient. Please try again.' });
         }
@@ -90,7 +90,7 @@ export default function NewPatient() {
                 <div className="form-section-title">Contact Details</div>
                 <div className="form-grid">
                     <div className="form-group">
-                        <label>Mobile Number *</label>
+                        <label>Contact Number *</label>
                         <input type="tel" className={errors.phone ? 'error' : ''} value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="10-digit mobile" />
                         {errors.phone && <span className="form-error">{errors.phone}</span>}
                     </div>
@@ -99,7 +99,7 @@ export default function NewPatient() {
                         <input type="tel" value={form.altPhone} onChange={e => set('altPhone', e.target.value)} placeholder="Optional" />
                     </div>
                     <div className="form-group">
-                        <label>Email</label>
+                        <label>Mail ID</label>
                         <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="patient@email.com" />
                     </div>
                     <div className="form-group">

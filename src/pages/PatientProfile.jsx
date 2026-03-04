@@ -29,9 +29,23 @@ export default function PatientProfile() {
         </div>
     );
 
-    const age = patient.dob ? differenceInYears(new Date(), parseISO(patient.dob)) : '—';
-    const patientAppts = appointments.filter(a => a.patientId === id).sort((a, b) => b.date.localeCompare(a.date));
-    const patientBills = bills.filter(b => b.patientId === id).sort((a, b) => b.date.localeCompare(a.date));
+    const getAge = (dob) => {
+        if (!dob) return '—';
+        try {
+            const date = typeof dob === 'string' ? parseISO(dob) : new Date(dob);
+            return differenceInYears(new Date(), date);
+        } catch (e) { return '—'; }
+    };
+
+    const age = getAge(patient.dob);
+    const patientAppts = appointments.filter(a => {
+        const pId = typeof a.patientId === 'object' ? a.patientId?._id : a.patientId;
+        return pId === id;
+    }).sort((a, b) => b.date.localeCompare(a.date));
+    const patientBills = bills.filter(b => {
+        const pId = typeof b.patientId === 'object' ? b.patientId?._id : b.patientId;
+        return pId === id;
+    }).sort((a, b) => b.date.localeCompare(a.date));
     const pendingAmt = patientBills.filter(b => b.status !== 'paid').reduce((s, b) => s + (b.total - b.paid), 0);
     const toothEntries = Object.entries(patient.toothRecords || {});
     const doctor = DOCTORS.find(d => d.id === patient.firstDoctor);
@@ -88,7 +102,7 @@ export default function PatientProfile() {
                                 <Sparkles size={12} /> {acceptance.label} Acceptance Propensity
                             </div>
                         </div>
-                        <p className="page-subtitle">Patient ID: {patient.id} · NFC: {patient.nfcId}</p>
+                        <p className="page-subtitle">Patient ID: {patient._id} · NFC: {patient.nfcId}</p>
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -118,7 +132,7 @@ export default function PatientProfile() {
                     <div className="profile-name">{patient.name}</div>
                     <div className="profile-meta">{patient.gender} · {age} yrs · {patient.bloodGroup}</div>
                     <div className="profile-contacts">
-                        {patient.phone && <span><Phone size={13} /> {patient.phone}</span>}
+                        {(patient.phone || patient.contact) && <span><Phone size={13} /> {patient.phone || patient.contact}</span>}
                         {patient.email && <span><Mail size={13} /> {patient.email}</span>}
                         {patient.nfcId && <span><Wifi size={13} /> {patient.nfcId}</span>}
                     </div>

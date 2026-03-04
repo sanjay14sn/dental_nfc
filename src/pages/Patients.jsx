@@ -61,7 +61,7 @@ export default function Patients() {
             <div className="patient-grid">
                 {filtered.length === 0 && <div className="empty-state" style={{ gridColumn: '1/-1' }}>No patients found</div>}
                 {filtered.map(p => (
-                    <div key={p.id} className="patient-card" onClick={() => navigate(`/patients/${p.id}`)}>
+                    <div key={p._id} className="patient-card" onClick={() => navigate(`/patients/${p._id}`)}>
                         <div className="patient-card-header">
                             <div className="patient-avatar-lg" style={{
                                 background: p.gender === 'Female' ? 'linear-gradient(135deg,#ec4899,#f9a8d4)' : 'linear-gradient(135deg,#3b82f6,#93c5fd)'
@@ -75,8 +75,8 @@ export default function Patients() {
                             <span className="status-dot" style={{ background: statusColor[p.status] || '#999' }} />
                         </div>
                         <div className="patient-card-body">
-                            <div className="patient-detail"><Phone size={13} />{p.phone}</div>
-                            <div className="patient-detail"><Activity size={13} />NFC: {p.nfcId}</div>
+                            <div className="patient-detail"><Phone size={13} />{p.phone || p.contact}</div>
+                            <div className="patient-detail"><Activity size={13} />NFC: {p.nfcId || '—'}</div>
                             {p.medicalHistory && p.medicalHistory !== 'None' && (
                                 <div className="patient-tag">{p.medicalHistory}</div>
                             )}

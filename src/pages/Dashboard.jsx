@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#22c55e', '#f59e0b', '#06b6d4', '#f97316'];
 
 export default function Dashboard() {
-    const { patients, appointments, bills, loading } = useApp();
+    const { patients, appointments, bills, user, loading } = useApp();
     const navigate = useNavigate();
 
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -25,11 +25,11 @@ export default function Dashboard() {
     const statusLabel = { scheduled: 'Scheduled', waiting: 'Waiting', 'in-treatment': 'In Treatment', completed: 'Done', cancelled: 'Cancelled' };
 
     const kpis = [
-        { label: "Today's Revenue", value: `₹${todayRevenue.toLocaleString('en-IN')}`, icon: TrendingUp, color: '#22c55e', sub: 'From bills today' },
+        { label: "Today's Revenue", value: `₹${todayRevenue.toLocaleString('en-IN')}`, icon: TrendingUp, color: '#22c55e', sub: 'From bills today', restricted: true },
         { label: 'Total Patients', value: patients.length, icon: Users, color: '#3b82f6', sub: `${patients.filter(p => p.status === 'active').length} active` },
         { label: "Today's Appointments", value: todayAppts.length, icon: CalendarDays, color: '#8b5cf6', sub: `${todayAppts.filter(a => a.status === 'completed').length} completed` },
-        { label: 'Pending Dues', value: `₹${pendingBills.reduce((s, b) => s + (b.total - b.paid), 0).toLocaleString('en-IN')}`, icon: AlertCircle, color: '#f59e0b', sub: `${pendingBills.length} invoices` },
-    ];
+        { label: 'Pending Dues', value: `₹${pendingBills.reduce((s, b) => s + (b.total - b.paid), 0).toLocaleString('en-IN')}`, icon: AlertCircle, color: '#f59e0b', sub: `${pendingBills.length} invoices`, restricted: true },
+    ].filter(k => user?.role !== 'nurse' || !k.restricted);
 
     // --- Smart Recall Engine Logic ---
     const getRecallsDue = () => {
@@ -106,30 +106,32 @@ export default function Dashboard() {
             </div>
 
             {/* Revenue Engine / Recalls (New Section) */}
-            <div className="recall-section">
-                <div className="section-header">
-                    <div className="section-title"><Clock size={16} color="#8b5cf6" /> Revenue Engine: Smart Recalls</div>
-                    <span className="badge-purple">{recallsDue.length} Due Today</span>
-                </div>
-                <div className="recall-grid">
-                    {recallsDue.map((r, i) => (
-                        <div key={i} className="recall-card">
-                            <div className="recall-p-info">
-                                <div className="recall-name">{r.patient.name}</div>
-                                <div className="recall-type">{r.type}</div>
-                                <div className="recall-reason">{r.reason}</div>
+            {user?.role !== 'nurse' && (
+                <div className="recall-section">
+                    <div className="section-header">
+                        <div className="section-title"><Clock size={16} color="#8b5cf6" /> Revenue Engine: Smart Recalls</div>
+                        <span className="badge-purple">{recallsDue.length} Due Today</span>
+                    </div>
+                    <div className="recall-grid">
+                        {recallsDue.map((r, i) => (
+                            <div key={i} className="recall-card">
+                                <div className="recall-p-info">
+                                    <div className="recall-name">{r.patient.name}</div>
+                                    <div className="recall-type">{r.type}</div>
+                                    <div className="recall-reason">{r.reason}</div>
+                                </div>
+                                <button className="btn-whatsapp" onClick={() => handleRecallWhatsApp(r)}>
+                                    <Phone size={12} /> Send Reminder
+                                </button>
                             </div>
-                            <button className="btn-whatsapp" onClick={() => handleRecallWhatsApp(r)}>
-                                <Phone size={12} /> Send Reminder
-                            </button>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Charts Row */}
             <div className="charts-grid">
-                <div className="chart-card">
+                <div className="chart-card" style={{ display: user?.permissions?.payments?.read ? 'block' : 'none' }}>
                     <div className="chart-title">Weekly Revenue</div>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={REVENUE_DATA} barSize={28}>

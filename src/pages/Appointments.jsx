@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Plus, CalendarDays, Clock, X, Check, AlertCircle, Circle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { DOCTORS, TREATMENTS } from '../data/mockData';
+import { TREATMENTS } from '../data/mockData';
 
 const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -14,10 +14,20 @@ const STATUS_CONFIG = {
     cancelled: { label: 'Cancelled', color: '#ef4444', icon: X },
 };
 
-const EMPTY_FORM = { patientId: '', doctorId: 'd1', date: today, time: '09:00', treatmentType: '', status: 'scheduled', notes: '' };
+const EMPTY_FORM = {
+    patientId: '',
+    patientName: '',
+    patientPhone: '',
+    doctorId: '',
+    date: today,
+    time: '09:00',
+    treatmentType: '',
+    status: 'scheduled',
+    notes: ''
+};
 
 export default function Appointments() {
-    const { appointments, patients, addAppointment, updateAppointment, deleteAppointment } = useApp();
+    const { appointments, patients, doctors, addAppointment, updateAppointment, deleteAppointment } = useApp();
     const [dateFilter, setDateFilter] = useState(today);
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState(EMPTY_FORM);
@@ -25,17 +35,28 @@ export default function Appointments() {
 
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-    const filtered = appointments.filter(a => !dateFilter || a.date === dateFilter)
-        .sort((a, b) => a.time.localeCompare(b.time));
+    const filtered = appointments.filter(a => {
+        if (!dateFilter) return true;
+        const apptDate = a.date.includes('T') ? a.date.split('T')[0] : a.date;
+        return apptDate === dateFilter;
+    }).sort((a, b) => a.time.localeCompare(b.time));
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.patientId || !form.treatmentType) return;
+        const isRegistered = !!form.patientId;
+        if (!isRegistered && !form.patientName) return;
+        if (!form.treatmentType) return;
+
         try {
+            const payload = {
+                ...form,
+                reason: form.treatmentType // Sync with backend if needed, but we added treatmentType to backend too
+            };
+
             if (editId) {
-                await updateAppointment(editId, form);
+                await updateAppointment(editId, payload);
             } else {
-                await addAppointment(form);
+                await addAppointment(payload);
             }
         } catch (err) {
             console.error('Failed to save appointment:', err);
@@ -46,8 +67,18 @@ export default function Appointments() {
     };
 
     const handleEdit = (a) => {
-        setForm({ patientId: a.patientId, doctorId: a.doctorId, date: a.date, time: a.time, treatmentType: a.treatmentType, status: a.status, notes: a.notes || '' });
-        setEditId(a.id);
+        setForm({
+            patientId: a.patientId || '',
+            patientName: a.patientName || '',
+            patientPhone: a.patientPhone || '',
+            doctorId: a.doctorId,
+            date: a.date,
+            time: a.time,
+            treatmentType: a.treatmentType || a.reason || '',
+            status: a.status,
+            notes: a.notes || ''
+        });
+        setEditId(a._id || a.id);
         setShowForm(true);
     };
 
@@ -97,16 +128,33 @@ export default function Appointments() {
                         </div>
                         <form onSubmit={handleSubmit} className="modal-form">
                             <div className="form-group">
-                                <label>Patient *</label>
-                                <select value={form.patientId} onChange={e => set('patientId', e.target.value)} required>
-                                    <option value="">Select patient…</option>
-                                    {patients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.phone})</option>)}
-                                </select>
+                                <label>Patient Type</label>
+                                <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                                        <input type="radio" name="ptype" checked={!!form.patientId || (!form.patientName && !form.patientPhone)} onChange={() => { set('patientName', ''); set('patientPhone', ''); }} /> Registered
+                                    </label>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                                        <input type="radio" name="ptype" checked={!form.patientId && (!!form.patientName || !!form.patientPhone)} onChange={() => set('patientId', '')} /> Walk-in / New
+                                    </label>
+                                </div>
+
+                                {(!form.patientName && !form.patientPhone) || form.patientId ? (
+                                    <select value={form.patientId} onChange={e => set('patientId', e.target.value)} required>
+                                        <option value="">Select patient…</option>
+                                        {patients.map(p => <option key={p._id} value={p._id}>{p.name} ({p.phone || p.contact})</option>)}
+                                    </select>
+                                ) : (
+                                    <div className="form-grid">
+                                        <input placeholder="Patient Name *" value={form.patientName} onChange={e => set('patientName', e.target.value)} required />
+                                        <input placeholder="Phone Number" value={form.patientPhone} onChange={e => set('patientPhone', e.target.value)} />
+                                    </div>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Doctor</label>
-                                <select value={form.doctorId} onChange={e => set('doctorId', e.target.value)}>
-                                    {DOCTORS.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                <label>Doctor *</label>
+                                <select value={form.doctorId} onChange={e => set('doctorId', e.target.value)} required>
+                                    <option value="">Select doctor…</option>
+                                    {doctors.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
                                 </select>
                             </div>
                             <div className="form-grid">
@@ -149,23 +197,30 @@ export default function Appointments() {
             <div className="appt-full-list">
                 {filtered.length === 0 && <div className="empty-state">No appointments for this date</div>}
                 {filtered.map(a => {
-                    const patient = patients.find(p => p.id === a.patientId);
-                    const doctor = DOCTORS.find(d => d.id === a.doctorId);
+                    const id = a._id;
+                    const pId = typeof a.patientId === 'object' ? a.patientId?._id : a.patientId;
+                    const patient = patients.find(p => p._id === pId || p.id === pId);
+                    const doctor = doctors.find(d => d._id === a.doctorId || d.id === a.doctorId);
                     const cfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.scheduled;
+                    const displayDate = a.date.includes('T') ? format(parseISO(a.date), 'yyyy-MM-dd') : a.date;
+
                     return (
-                        <div key={a.id} className="appt-card">
+                        <div key={id || a.id} className="appt-card">
                             <div className="appt-card-time">
                                 <Clock size={14} />
                                 <span>{a.time}</span>
-                                <span className="appt-card-date">{a.date}</span>
+                                <span className="appt-card-date">{displayDate}</span>
                             </div>
                             <div className="appt-card-patient">
-                                <div className="appt-avatar-sm" style={{ background: patient?.gender === 'Female' ? 'linear-gradient(135deg,#ec4899,#f9a8d4)' : 'linear-gradient(135deg,#3b82f6,#93c5fd)' }}>
-                                    {patient?.name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
+                                <div className="appt-avatar-sm" style={{ background: (patient?.gender === 'Female' ? 'linear-gradient(135deg,#ec4899,#f9a8d4)' : 'linear-gradient(135deg,#3b82f6,#93c5fd)') }}>
+                                    {(patient?.name || a.patientName)?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?'}
                                 </div>
                                 <div>
-                                    <div className="appt-patient-name">{patient?.name || 'Unknown'}</div>
-                                    <div className="appt-patient-sub">{a.treatmentType} · {doctor?.name}</div>
+                                    <div className="appt-patient-name">{patient?.name || a.patientName || 'Unknown'}</div>
+                                    <div className="appt-patient-sub">
+                                        {a.treatmentType || a.reason} · {doctor?.name}
+                                        {a.patientPhone && <span style={{ marginLeft: 8, opacity: 0.7 }}>📞 {a.patientPhone}</span>}
+                                    </div>
                                     {a.notes && <div className="appt-patient-notes">{a.notes}</div>}
                                 </div>
                             </div>
@@ -173,10 +228,10 @@ export default function Appointments() {
                                 <span className="status-badge" style={{ '--s': cfg.color }}>{cfg.label}</span>
                                 <div className="appt-actions">
                                     {a.status !== 'completed' && a.status !== 'cancelled' && (
-                                        <button className="btn btn-ghost btn-xs" onClick={() => handleStatus(a.id, 'completed')} title="Mark done"><Check size={14} /></button>
+                                        <button className="btn btn-ghost btn-xs" onClick={() => handleStatus(id, 'completed')} title="Mark done"><Check size={14} /></button>
                                     )}
                                     <button className="btn btn-ghost btn-xs" onClick={() => handleEdit(a)} title="Edit">✎</button>
-                                    <button className="btn btn-ghost btn-xs danger" onClick={() => deleteAppointment(a.id)} title="Delete"><X size={14} /></button>
+                                    <button className="btn btn-ghost btn-xs danger" onClick={() => deleteAppointment(id)} title="Delete"><X size={14} /></button>
                                 </div>
                             </div>
                         </div>
