@@ -416,6 +416,28 @@ body {
   padding: 24px;
 }
 
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -4217,33 +4239,31 @@ tbody tr:hover {
   gap: 6px;
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
+
 /* ============================================================
    Staff Management Portal - Dedicated Styles
    ============================================================ */
-.staff-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
+/* ============================================================
+   Staff Management Portal - Dedicated Styles
+   ============================================================ */
 .staff-card {
-  background: var(--card) !important;
-  border-radius: var(--radius-xl) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow-sm) !important;
-  transition: var(--transition) !important;
-  overflow: hidden !important;
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  overflow: hidden;
   margin-bottom: 1.5rem;
 }
 
 .staff-card:hover {
-  box-shadow: var(--shadow) !important;
-  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
 }
 
 .staff-input-group {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .staff-input-group label {
@@ -4253,52 +4273,38 @@ tbody tr:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
-  margin-left: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 0.25rem;
 }
 
 .staff-input-wrapper {
   position: relative;
-  display: flex !important;
-  align-items: center !important;
+  display: flex;
+  align-items: center;
 }
 
 .staff-input-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   color: var(--primary);
   pointer-events: none;
-  z-index: 20;
+  z-index: 10;
 }
 
 .staff-input {
-  width: 100% !important;
-  min-height: 3.5rem !important;
-  padding: 0.8rem 1rem 0.8rem 4rem !important;
-  border: 2px solid var(--border) !important;
-  border-radius: var(--radius-lg) !important;
-  font-size: 1.1rem !important;
-  font-weight: 600 !important;
-  color: var(--text) !important;
-  background: #fff !important;
-  transition: all 0.2s ease !important;
-  outline: none !important;
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  background: #fff;
+  transition: var(--transition);
+  outline: none;
 }
 
 .staff-input:focus {
-  border-color: var(--primary) !important;
-  box-shadow: 0 0 0 4px var(--primary-light) !important;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26, 127, 191, 0.12);
 }
-
-.staff-badge {
-  padding: 0.35rem 1rem;
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.staff-badge-admin { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
-.staff-badge-doctor { background: #dbeafe; color: #3b82f6; border: 1px solid #bfdbfe; }
-.staff-badge-nurse { background: #dcfce7; color: #22c55e; border: 1px solid #bbf7d0; }
