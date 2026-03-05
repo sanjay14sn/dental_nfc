@@ -16,7 +16,7 @@ import Scans from './pages/Scans';
 
 import Hospitals from './pages/SuperAdmin/Hospitals';
 import SuperAdminPortal from './pages/SuperAdmin/SuperAdminPortal';
-import UserManagement from './pages/Admin/UserManagement';
+import UserManagement from './pages/Admin/UserManagement.jsx';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 

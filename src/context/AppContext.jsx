@@ -13,15 +13,16 @@ const load = (key, fallback) => {
 };
 
 export function AppProvider({ children }) {
+    // --- State ---
+    const [user, setUser] = useState(() => load('dc_user', null));
     const [patients, setPatients] = useState(() => load('dc_patients', []));
     const [appointments, setAppointments] = useState(() => load('dc_appointments', []));
     const [bills, setBills] = useState(() => load('dc_bills', []));
-    const [user, setUser] = useState(() => load('dc_user', null));
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(false);
 
     /* ===============================
-       AUTH FETCH (STRICT VERSION)
+       AUTH FETCH (Secure API Caller)
     =============================== */
     const authFetch = useCallback(async (url, options = {}) => {
         const token = user?.token;
@@ -46,58 +47,56 @@ export function AppProvider({ children }) {
             throw new Error('Session expired');
         }
 
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || 'Request failed');
-        }
-
         return res;
     }, [user]);
 
     /* ===============================
        INITIAL DATA LOAD
     =============================== */
-    useEffect(() => {
+    const refreshData = useCallback(async () => {
         if (!user?.token) return;
 
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [ptsRes, apptsRes, billsRes, docsRes] = await Promise.all([
-                    authFetch(`${API_BASE}/patients`),
-                    authFetch(`${API_BASE}/appointments`),
-                    authFetch(`${API_BASE}/bills`),
-                    authFetch(`${API_BASE}/users/doctors`)
-                ]);
+        setLoading(true);
+        try {
+            // We fetch all core data needed for Dashboard & Operations
+            const [ptsRes, apptsRes, billsRes, docsRes] = await Promise.all([
+                authFetch(`${API_BASE}/patients`),
+                authFetch(`${API_BASE}/appointments`),
+                authFetch(`${API_BASE}/bills`),
+                authFetch(`${API_BASE}/users/doctors`) // Assuming you have an endpoint for doctor list
+            ]);
 
-                const [pts, appts, bls, docs] = await Promise.all([
-                    ptsRes.json(),
-                    apptsRes.json(),
-                    billsRes.json(),
-                    docsRes.json()
-                ]);
+            if (ptsRes.ok && apptsRes.ok && billsRes.ok) {
+                const pts = await ptsRes.json();
+                const appts = await apptsRes.json();
+                const bls = await billsRes.json();
 
-                console.log('Fetched appointments:', appts);
+                // Handle doctors gracefully (if endpoint fails, use empty array)
+                const docs = docsRes.ok ? await docsRes.json() : [];
+
                 setPatients(pts);
                 setAppointments(appts);
                 setBills(bls);
                 setDoctors(docs);
 
+                // Cache for offline/reload speed
                 localStorage.setItem('dc_patients', JSON.stringify(pts));
                 localStorage.setItem('dc_appointments', JSON.stringify(appts));
                 localStorage.setItem('dc_bills', JSON.stringify(bls));
-            } catch (err) {
-                console.error('Initial API fetch failed:', err);
-            } finally {
-                setLoading(false);
             }
-        };
-
-        fetchData();
+        } catch (err) {
+            console.error('Initial API fetch failed:', err);
+        } finally {
+            setLoading(false);
+        }
     }, [user, authFetch]);
 
+    useEffect(() => {
+        refreshData();
+    }, [refreshData]);
+
     /* ===============================
-       LOGIN
+       AUTH ACTIONS
     =============================== */
     const login = async (username, password) => {
         try {
@@ -110,15 +109,12 @@ export function AppProvider({ children }) {
             if (!res.ok) return false;
 
             const data = await res.json();
+            if (!data.token) return false;
 
-            if (!data.token) {
-                console.error('Login response missing token');
-                return false;
-            }
-
+            // Generate a simple avatar initial if not provided
             const userData = {
                 ...data,
-                avatar: data.name?.split(' ').map(n => n[0]).join('')
+                avatar: data.name ? data.name.split(' ').map(n => n[0]).join('') : 'U'
             };
 
             setUser(userData);
@@ -132,21 +128,25 @@ export function AppProvider({ children }) {
 
     const logout = () => {
         setUser(null);
+        setPatients([]);
+        setAppointments([]);
+        setBills([]);
         localStorage.clear();
     };
 
     /* ===============================
-       PATIENTS
+       CRUD OPERATIONS
     =============================== */
+
+    // --- Patients ---
     const addPatient = async (p) => {
         const res = await authFetch(`${API_BASE}/patients`, {
             method: 'POST',
             body: JSON.stringify(p)
         });
-
-        const patient = await res.json();
-        setPatients(prev => [...prev, patient]);
-        return patient;
+        const saved = await res.json();
+        setPatients(prev => [...prev, saved]);
+        return saved;
     };
 
     const updatePatient = async (id, updates) => {
@@ -154,27 +154,20 @@ export function AppProvider({ children }) {
             method: 'PUT',
             body: JSON.stringify(updates)
         });
-
-        const updated = await res.json();
-        setPatients(prev =>
-            prev.map(p => p._id === id ? updated : p)
-        );
+        const saved = await res.json();
+        setPatients(prev => prev.map(p => p._id === id ? saved : p));
+        return saved;
     };
 
-    /* ===============================
-       APPOINTMENTS (FIXED _id ONLY)
-    =============================== */
+    // --- Appointments ---
     const addAppointment = async (a) => {
-        console.log('POST /appointments request data:', a);
         const res = await authFetch(`${API_BASE}/appointments`, {
             method: 'POST',
             body: JSON.stringify(a)
         });
-
-        const appt = await res.json();
-        console.log('Appointed created:', appt);
-        setAppointments(prev => [...prev, appt]);
-        return appt;
+        const saved = await res.json();
+        setAppointments(prev => [...prev, saved]);
+        return saved;
     };
 
     const updateAppointment = async (id, updates) => {
@@ -182,35 +175,25 @@ export function AppProvider({ children }) {
             method: 'PUT',
             body: JSON.stringify(updates)
         });
-
-        const updated = await res.json();
-        setAppointments(prev =>
-            prev.map(a => a._id === id ? updated : a)
-        );
+        const saved = await res.json();
+        setAppointments(prev => prev.map(a => a._id === id ? saved : a));
+        return saved;
     };
 
     const deleteAppointment = async (id) => {
-        await authFetch(`${API_BASE}/appointments/${id}`, {
-            method: 'DELETE'
-        });
-
-        setAppointments(prev =>
-            prev.filter(a => a._id !== id)
-        );
+        await authFetch(`${API_BASE}/appointments/${id}`, { method: 'DELETE' });
+        setAppointments(prev => prev.filter(a => a._id !== id));
     };
 
-    /* ===============================
-       BILLS
-    =============================== */
+    // --- Bills ---
     const addBill = async (b) => {
         const res = await authFetch(`${API_BASE}/bills`, {
             method: 'POST',
             body: JSON.stringify(b)
         });
-
-        const bill = await res.json();
-        setBills(prev => [...prev, bill]);
-        return bill;
+        const saved = await res.json();
+        setBills(prev => [...prev, saved]);
+        return saved;
     };
 
     const updateBill = async (id, updates) => {
@@ -218,30 +201,36 @@ export function AppProvider({ children }) {
             method: 'PUT',
             body: JSON.stringify(updates)
         });
-
-        const updated = await res.json();
-        setBills(prev =>
-            prev.map(b => b._id === id ? updated : b)
-        );
+        const saved = await res.json();
+        setBills(prev => prev.map(b => b._id === id ? saved : b));
+        return saved;
     };
 
     return (
         <AppContext.Provider value={{
+            // State
+            user,
             patients,
             appointments,
             bills,
             doctors,
             loading,
+            API_BASE, // Exporting this so other components can use it
+
+            // Auth
+            login,
+            logout,
+            authFetch, // Exporting this so UserManagement can use it
+
+            // Actions
+            refreshData,
             addPatient,
             updatePatient,
             addAppointment,
             updateAppointment,
             deleteAppointment,
             addBill,
-            updateBill,
-            user,
-            login,
-            logout
+            updateBill
         }}>
             {children}
         </AppContext.Provider>
